@@ -1,13 +1,14 @@
 package com.example.cruddemo.entity;
 
+
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "instructor")
-public class Instructor {
+@Table(name ="student")
+public class Student {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,20 +24,15 @@ public class Instructor {
     @Column(name = "email")
     private String email;
 
-    @OneToOne(cascade =  CascadeType.ALL,
-            fetch = FetchType.LAZY)
-    @JoinColumn(name = "instructor_detail_id")
-    private InstructorDetail instructorDetail;
-
-    @OneToMany(mappedBy = "instructor",
-            cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.DETACH},
-            fetch = FetchType.LAZY)
+    @ManyToMany(cascade = {CascadeType.DETACH,CascadeType.REFRESH,CascadeType.PERSIST,CascadeType.MERGE},
+            fetch = FetchType.LAZY,
+            mappedBy = "students")
     private List<Course> courses;
 
-    public Instructor() {
+    public Student() {
     }
 
-    public Instructor(String firstName, String lastName, String email) {
+    public Student(String firstName, String lastName, String email) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -74,14 +70,6 @@ public class Instructor {
         this.email = email;
     }
 
-    public InstructorDetail getInstructorDetail() {
-        return instructorDetail;
-    }
-
-    public void setInstructorDetail(InstructorDetail instructorDetail) {
-        this.instructorDetail = instructorDetail;
-    }
-
     public List<Course> getCourses() {
         return courses;
     }
@@ -90,37 +78,23 @@ public class Instructor {
         this.courses = courses;
     }
 
-    public void add(Course tempCourse){
-        if(courses==null){
+    public void addCourse(Course course){
+
+        if(courses == null){
             courses = new ArrayList<>();
         }
 
-        courses.add(tempCourse);
-
-        tempCourse.setInstructor(this);
+        courses.add(course);
+        course.addStudent(this);
     }
-
-    public void add(List<Course> list){
-        if(courses==null){
-            courses = new ArrayList<>();
-        }
-
-        for(Course course : list){
-            courses.add(course);
-            course.setInstructor(this);
-        }
-
-
-    }
-
 
     @Override
     public String toString() {
-        return "Instructor{" +
-                "id=" + id +
-                ", firstName='" + firstName + '\'' +
+        return "Student{" +
+                "email='" + email + '\'' +
                 ", lastName='" + lastName + '\'' +
-                ", email='" + email + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", id=" + id +
                 '}';
     }
 }

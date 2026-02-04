@@ -3,6 +3,7 @@ package com.example.cruddemo.dao;
 import com.example.cruddemo.entity.Course;
 import com.example.cruddemo.entity.Instructor;
 import com.example.cruddemo.entity.InstructorDetail;
+import com.example.cruddemo.entity.Student;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
@@ -108,6 +109,62 @@ public class AppDAOImpl implements AppDAO{
         Course course = entityManager.find(Course.class, id);
 
         entityManager.remove(course);
+    }
+
+    @Override
+    @Transactional
+    public void save(Course course) {
+
+        entityManager.persist(course);
+    }
+
+    @Override
+    public Course findCourseAndReviewsByCourseId(int id) {
+
+        TypedQuery<Course> query = entityManager.createQuery(
+                "select c from Course c JOIN FETCH c.reviews where c.id = :data", Course.class);
+        query.setParameter("data",id);
+
+        return query.getSingleResult();
+    }
+
+    @Override
+    public Course findCourseAndStudentsByCourseId(int id) {
+
+        TypedQuery<Course> query = entityManager
+                .createQuery("select c from Course c JOIN FETCH c.students where c.id = :data", Course.class);
+        query.setParameter("data",id);
+
+        return query.getSingleResult();
+    }
+
+    @Override
+    public Student findStudentAndCoursesByStudentId(int id) {
+
+        TypedQuery<Student> query = entityManager
+                .createQuery("select s from Student s JOIN FETCH s.courses where s.id = :data", Student.class);
+        query.setParameter("data",id);
+
+        return query.getSingleResult();
+    }
+
+    @Override
+    @Transactional
+    public void update(Student student) {
+        entityManager.merge(student);
+    }
+
+    @Override
+    @Transactional
+    public void deleteStudentById(int id) {
+        Student s = entityManager.find(Student.class,id);
+
+        List<Course> courses = s.getCourses();
+        for(Course c : courses){
+            c.getStudents().remove(s);
+        }
+
+        entityManager.remove(s);
     }
 
 
